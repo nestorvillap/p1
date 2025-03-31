@@ -1,0 +1,11 @@
+export const {
+  PORT = '3000',
+  DB_URI,
+  JWT_SECRET = 'SECRET',
+  S3_ACCESS_KEY_ID,
+  S3_SECRET_ACCESS_KEY,
+  S3_ENDPOINT,
+  S3_REGION,
+  S3_BUCKET_NAME,
+  RESEND_API_KEY
+} = process.env
