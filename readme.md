@@ -11,7 +11,7 @@ Este proyecto es una aplicación web desarrollada como parte de un curso univers
 
 1. Clona este repositorio:
    ```bash
-   git clone <URL_DEL_REPOSITORIO>
+   git clone https://github.com/nestorvillap/p1.git
    ```
 2. Navega al directorio del proyecto:
    ```bash
