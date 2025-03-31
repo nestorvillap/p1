@@ -22,7 +22,8 @@ const userSchema = new mongoose.Schema({
   resetPasswordToken: { type: String },
   maxAttempts: { type: Number, default: 3 },
   verified: { type: Boolean, default: false },
-  verificationCode: { type: Number }
+  verificationCode: { type: Number },
+  resetPasswordCode: { type: Number }
 })
 
 // Hash de la contraseña antes de guardar
@@ -38,6 +39,14 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.generateValidationCode = function () {
   const code = Math.floor(100000 + Math.random() * 900000) // Genera un número entre 100000 y 999999
   this.verificationCode = code
+  this.save()
+  return code
+}
+
+// Generar un código aleatorio de 6 dígitos para restablecer la contraseña
+userSchema.methods.generateResetPasswordCode = function () {
+  const code = Math.floor(100000 + Math.random() * 900000) // Genera un número entre 100000 y 999999
+  this.resetPasswordCode = code
   this.save()
   return code
 }

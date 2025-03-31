@@ -54,4 +54,17 @@ const validateUserInvite = [
   (req, res, next) => validateResults(req, res, next)
 ]
 
-export { validateRegister, validateVerification, validateLogin, validateUpdateRegistration, validateUpdateCompany, validateResetPassword, validateUserInvite }
+const validateUpdatePassword = [
+  check('email').isEmail().withMessage('Invalid email format'),
+  check('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long'),
+  check('code')
+    .isLength({ min: 6, max: 6 })
+    .withMessage('Verification code must be 6 digits long')
+    .isNumeric()
+    .withMessage('Verification code must be numeric'),
+  (req, res, next) => validateResults(req, res, next)
+]
+
+export { validateRegister, validateVerification, validateLogin, validateUpdateRegistration, validateUpdateCompany, validateResetPassword, validateUserInvite, validateUpdatePassword }

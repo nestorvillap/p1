@@ -19,24 +19,32 @@ export async function createUserAccount ({ email, password }) {
   return { user, token }
 }
 
-export async function confirmUserVerification ({ userId, code, password }) {
-  const user = await User.findById(userId)
+export async function confirmUserVerification ({ email, code }) {
+  const user = await User.findOne({ email })
   if (!user) throw new Error('user not found')
   if (user.verified) throw new Error('user already verified')
   if (String(user.verificationCode) !== String(code)) throw new Error('invalid verification code')
-
-  if (user.password === '' && !password) {
-    throw new Error('password is required')
-  }
-
-  if (password) {
-    user.password = password
-  }
 
   user.verified = true
   await user.save()
 
   const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: '1h' })
+  return { user, token }
+}
+
+export async function updatePassword ({ email, password, code }) {
+  const user = await User.findOne({ email })
+  if (!user) throw new Error('user not found')
+  if (user.verificationCode === 0) throw new Error('you need to generate a recover code first')
+  if (!password) throw new Error('password is required')
+  if (String(user.resetPasswordCode) !== String(code)) throw new Error('invalid verification code')
+
+  user.password = password
+  user.verificationCode = 0
+  await user.save()
+
+  const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: '1h' })
+
   return { user, token }
 }
 
@@ -94,15 +102,17 @@ export async function initiatePasswordRecovery ({ email }) {
   const user = await User.findOne({ email })
   if (!user) throw new Error('User not found')
 
-  user.verified = false
-  user.generateValidationCode()
+  user.generateResetPasswordCode()
   await user.save()
 
+  // Despues con ese codigo puede hacer un update password
   sendEmail({
     to: user.email,
     subject: 'Recuperación de Contraseña',
     html: `<p>Usa el siguiente código para recuperar tu contraseña: <strong>${user.verificationCode}</strong></p>`
   })
+
+  return { user }
 }
 
 export async function sendUserInvitation ({ email, inviterId }) {

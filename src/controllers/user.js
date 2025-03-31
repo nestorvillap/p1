@@ -8,7 +8,8 @@ import {
   fetchUserDetails,
   removeUserAccount,
   initiatePasswordRecovery,
-  sendUserInvitation
+  sendUserInvitation,
+  updatePassword
 } from '../services/user.js'
 import formidable from 'formidable'
 
@@ -23,10 +24,10 @@ export async function registerUserController (req, res) {
 }
 
 export async function verifyUserController (req, res) {
-  const { code } = req.body
+  const { code, password } = req.body
   try {
-    await confirmUserVerification(req.user._id, code)
-    res.status(200).send({ status: 200 })
+    const { user, token } = await confirmUserVerification({ email: req.user.email, code, password })
+    res.status(200).send({ status: 200, data: { user: { email: user.email, verified: user.verified, role: user.role, _id: user._id }, token } })
   } catch (error) {
     res.status(400).send({ status: 400, message: error.message })
   }
@@ -134,6 +135,16 @@ export async function inviteUserController (req, res) {
   try {
     const newUser = await sendUserInvitation({ email, inviterId: req.user._id })
     res.status(201).send({ status: 201, data: { user: { email: newUser.email, role: newUser.role, _id: newUser._id } } })
+  } catch (error) {
+    res.status(500).send({ status: 500, message: error.message })
+  }
+}
+
+export async function updatePasswordController (req, res) {
+  const { email, password, code } = req.body
+  try {
+    const { user, token } = await updatePassword({ email, password, code })
+    res.status(201).send({ status: 201, data: { user: { email: user.email, role: user.role, _id: user._id }, token } })
   } catch (error) {
     res.status(500).send({ status: 500, message: error.message })
   }
